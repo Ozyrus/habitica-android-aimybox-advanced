@@ -70,6 +70,7 @@ import com.habitrpg.android.habitica.widget.AvatarStatsWidgetProvider
 import com.habitrpg.android.habitica.widget.DailiesWidgetProvider
 import com.habitrpg.android.habitica.widget.HabitButtonWidgetProvider
 import com.habitrpg.android.habitica.widget.TodoListWidgetProvider
+import com.justai.aimybox.components.AimyboxAssistantFragment
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Action
@@ -215,6 +216,11 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
 
         setupNotifications()
         setupBottomnavigationLayoutListener()
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+
+        fragmentTransaction.add(R.id.drawer_layout, AimyboxAssistantFragment())
+        fragmentTransaction.commit()
     }
 
     private fun setupNotifications() {
