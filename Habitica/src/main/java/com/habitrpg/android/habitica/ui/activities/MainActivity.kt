@@ -159,6 +159,11 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
         launchTrace?.start()
         super.onCreate(savedInstanceState)
 
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+
+        fragmentTransaction.add(R.id.coordinator_layout, AimyboxAssistantFragment())
+        fragmentTransaction.commit()
 
         if (!HabiticaBaseApplication.checkUserAuthentication(this, hostConfig)) {
             return
@@ -216,11 +221,7 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
 
         setupNotifications()
         setupBottomnavigationLayoutListener()
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
 
-        fragmentTransaction.add(R.id.assistant_container, AimyboxAssistantFragment())
-        fragmentTransaction.commit()
     }
 
     private fun setupNotifications() {
