@@ -134,9 +134,15 @@
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentEnd="true" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/assistant_container">
+                </FrameLayout>
             </RelativeLayout>
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->

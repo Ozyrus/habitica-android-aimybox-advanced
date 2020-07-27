@@ -1,5 +1,6 @@
 package com.habitrpg.android.habitica.ui.activities
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -18,7 +19,9 @@ import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
@@ -70,7 +73,9 @@ import com.habitrpg.android.habitica.widget.AvatarStatsWidgetProvider
 import com.habitrpg.android.habitica.widget.DailiesWidgetProvider
 import com.habitrpg.android.habitica.widget.HabitButtonWidgetProvider
 import com.habitrpg.android.habitica.widget.TodoListWidgetProvider
+import com.justai.aimybox.Aimybox
 import com.justai.aimybox.components.AimyboxAssistantFragment
+import com.justai.aimybox.model.TextSpeech
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Action
@@ -81,6 +86,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.util.*
 import javax.inject.Inject
+import kotlin.concurrent.timerTask
 
 open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
     @Inject
@@ -159,11 +165,7 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
         launchTrace?.start()
         super.onCreate(savedInstanceState)
 
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
-
-        fragmentTransaction.add(R.id.coordinator_layout, AimyboxAssistantFragment())
-        fragmentTransaction.commit()
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 1)
 
         if (!HabiticaBaseApplication.checkUserAuthentication(this, hostConfig)) {
             return
@@ -365,6 +367,10 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
     }
 
     override fun onBackPressed() {
+        val assistantFragment = (supportFragmentManager.findFragmentById(R.id.assistant_container)
+                as? AimyboxAssistantFragment)
+        if (assistantFragment?.onBackPressed() != true) super.onBackPressed()
+
         if (this.activeTutorialView != null) {
             this.removeActiveTutorialView()
         }
@@ -708,6 +714,18 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
                 binding.connectionIssueTextview.visibility = View.GONE
             }, 5000)
         }
+    }
+    @SuppressLint("MissingPermission")
+    override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
+    ) {
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+
+        fragmentTransaction.add(R.id.assistant_container, AimyboxAssistantFragment())
+        fragmentTransaction.commit()
     }
 
     fun hatchPet(potion: HatchingPotion, egg: Egg) {

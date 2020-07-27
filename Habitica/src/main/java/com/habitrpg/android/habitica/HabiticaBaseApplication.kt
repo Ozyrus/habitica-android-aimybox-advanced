@@ -282,7 +282,7 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
 
         val unitId = UUID.randomUUID().toString()
 
-        val textToSpeech = GooglePlatformTextToSpeech(context)
+        val textToSpeech = GooglePlatformTextToSpeech(context, Locale("Ru"))
         val speechToText = GooglePlatformSpeechToText(context, Locale("Ru"))
 
         val dialogApi = AimyboxDialogApi("N9tJW3BNv6lKyi6H8aD87k8LIu9HQndR", unitId)
