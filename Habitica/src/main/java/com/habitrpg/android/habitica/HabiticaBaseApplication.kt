@@ -1,6 +1,5 @@
 package com.habitrpg.android.habitica
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -11,6 +10,7 @@ import android.database.DatabaseErrorHandler
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.edit
 import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
@@ -36,12 +36,14 @@ import com.habitrpg.android.habitica.ui.helpers.MarkdownParser
 import com.habitrpg.android.habitica.ui.views.HabiticaIconsHelper
 import com.justai.aimybox.Aimybox
 import com.justai.aimybox.api.aimybox.AimyboxDialogApi
+import com.justai.aimybox.api.aimybox.AimyboxRequest
+import com.justai.aimybox.api.aimybox.AimyboxResponse
 import com.justai.aimybox.components.AimyboxProvider
 import com.justai.aimybox.core.Config
+import com.justai.aimybox.core.CustomSkill
+import com.justai.aimybox.model.Response
 import com.justai.aimybox.speechkit.google.platform.GooglePlatformSpeechToText
 import com.justai.aimybox.speechkit.google.platform.GooglePlatformTextToSpeech
-import com.justai.aimybox.speechkit.kaldi.KaldiAssets
-import com.justai.aimybox.speechkit.kaldi.KaldiVoiceTrigger
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 import io.realm.Realm
@@ -285,8 +287,23 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
         val textToSpeech = GooglePlatformTextToSpeech(context, Locale("Ru"))
         val speechToText = GooglePlatformSpeechToText(context, Locale("Ru"))
 
-        val dialogApi = AimyboxDialogApi("N9tJW3BNv6lKyi6H8aD87k8LIu9HQndR", unitId)
-
+        val dialogApi = AimyboxDialogApi(
+                "N9tJW3BNv6lKyi6H8aD87k8LIu9HQndR", unitId,
+                customSkills = linkedSetOf(ChangeView()))
         return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) )
+    }
+}
+
+class ChangeView(val context: Context? = HabiticaApplication().applicationContext): CustomSkill<AimyboxRequest, AimyboxResponse> {
+
+    override fun canHandle(response: AimyboxResponse) = response.action == "change_view"
+
+    override suspend fun onResponse(
+            response: AimyboxResponse,
+            aimybox: Aimybox,
+            defaultHandler: suspend (Response) -> Unit
+    ) {
+        val intent = Intent("ui.activities.PrefsActivity")
+        context?.startActivity(intent)
     }
 }
