@@ -219,7 +219,7 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
 
-        fragmentTransaction.add(R.id.drawer_layout, AimyboxAssistantFragment())
+        fragmentTransaction.add(R.id.assistant_container, AimyboxAssistantFragment())
         fragmentTransaction.commit()
     }
 
