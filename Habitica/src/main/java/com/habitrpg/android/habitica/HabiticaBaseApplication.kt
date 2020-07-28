@@ -1,5 +1,6 @@
 package com.habitrpg.android.habitica
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.database.DatabaseErrorHandler
 import android.database.sqlite.SQLiteDatabase
+import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat.startActivity
@@ -16,6 +18,7 @@ import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
 import com.amplitude.api.Amplitude
 import com.amplitude.api.Identify
+import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.core.ImagePipelineConfig
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -27,11 +30,11 @@ import com.habitrpg.android.habitica.components.AppComponent
 import com.habitrpg.android.habitica.components.UserComponent
 import com.habitrpg.android.habitica.data.ApiClient
 import com.habitrpg.android.habitica.helpers.RxErrorHandler
+import com.habitrpg.android.habitica.models.tasks.Task
 import com.habitrpg.android.habitica.modules.UserModule
 import com.habitrpg.android.habitica.modules.UserRepositoryModule
 import com.habitrpg.android.habitica.proxy.CrashlyticsProxy
-import com.habitrpg.android.habitica.ui.activities.IntroActivity
-import com.habitrpg.android.habitica.ui.activities.LoginActivity
+import com.habitrpg.android.habitica.ui.activities.*
 import com.habitrpg.android.habitica.ui.helpers.MarkdownParser
 import com.habitrpg.android.habitica.ui.views.HabiticaIconsHelper
 import com.justai.aimybox.Aimybox
@@ -288,13 +291,13 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
         val speechToText = GooglePlatformSpeechToText(context, Locale("Ru"))
 
         val dialogApi = AimyboxDialogApi(
-                "N9tJW3BNv6lKyi6H8aD87k8LIu9HQndR", unitId,
+                "1iy4V6nD0SgdS9HP3ipk7LSKE8V7ueTw", unitId,
                 customSkills = linkedSetOf(ChangeView()))
         return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) )
     }
 }
 
-class ChangeView(val context: Context? = HabiticaApplication().applicationContext): CustomSkill<AimyboxRequest, AimyboxResponse> {
+class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
 
     override fun canHandle(response: AimyboxResponse) = response.action == "change_view"
 
@@ -303,7 +306,39 @@ class ChangeView(val context: Context? = HabiticaApplication().applicationContex
             aimybox: Aimybox,
             defaultHandler: suspend (Response) -> Unit
     ) {
-        val intent = Intent("ui.activities.PrefsActivity")
-        context?.startActivity(intent)
+        val context = getApplicationContext()
+        val intent = when (response.intent) {
+            "settings" -> Intent(context, PrefsActivity::class.java)
+            "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)
+            "profile" -> Intent(".ui.activities.FullProfileActivity")
+            "about" -> Intent("ui.activities.AboutActivity")
+            else -> Intent("ui.activities.MainActivity")
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }
+
+//class CreateTask(val context: Context? = HabiticaApplication().applicationContext): CustomSkill<AimyboxRequest, AimyboxResponse> {
+//
+//    override fun canHandle(response: AimyboxResponse) = response.action == "create_task"
+//    override suspend fun onResponse(
+//            response: AimyboxResponse,
+//            aimybox: Aimybox,
+//            defaultHandler: suspend (Response) -> Unit
+//    ) {
+//        val intent = Intent("ui.activities.TaskFormActivity")
+//        val additionalData = HashMap<String, Any>()
+//        val type = response.intent
+//        additionalData["viewed task type"] = when (type) {
+//            "habit" -> Task.TYPE_HABIT
+//            "daily" -> Task.TYPE_DAILY
+//            "todo" -> Task.TYPE_TODO
+//            "reward" -> Task.TYPE_REWARD
+//            else -> ""
+//        }
+//        val bundle = Bundle()
+//        bundle.putString(TaskFormActivity.TASK_TYPE_KEY, type)
+//        context?.startActivity(intent)
+//    }
+//}
