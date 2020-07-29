@@ -292,7 +292,7 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
 
         val dialogApi = AimyboxDialogApi(
                 "1iy4V6nD0SgdS9HP3ipk7LSKE8V7ueTw", unitId,
-                customSkills = linkedSetOf(ChangeView()))
+                customSkills = linkedSetOf(ChangeView(), CreateTask()))
         return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) )
     }
 }
@@ -309,36 +309,38 @@ class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
         val context = getApplicationContext()
         val intent = when (response.intent) {
             "settings" -> Intent(context, PrefsActivity::class.java)
-            "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)
-            "profile" -> Intent(".ui.activities.FullProfileActivity")
-            "about" -> Intent("ui.activities.AboutActivity")
-            else -> Intent("ui.activities.MainActivity")
+            "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)//TODO: change character stats
+            "profile" -> Intent(context, FullProfileActivity::class.java)//TODO: need UUID to open right profile
+            "about" -> Intent(context, AboutActivity::class.java)
+            else -> Intent(context, MainActivity::class.java)
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }
 }
 
-//class CreateTask(val context: Context? = HabiticaApplication().applicationContext): CustomSkill<AimyboxRequest, AimyboxResponse> {
-//
-//    override fun canHandle(response: AimyboxResponse) = response.action == "create_task"
-//    override suspend fun onResponse(
-//            response: AimyboxResponse,
-//            aimybox: Aimybox,
-//            defaultHandler: suspend (Response) -> Unit
-//    ) {
-//        val intent = Intent("ui.activities.TaskFormActivity")
-//        val additionalData = HashMap<String, Any>()
-//        val type = response.intent
-//        additionalData["viewed task type"] = when (type) {
-//            "habit" -> Task.TYPE_HABIT
-//            "daily" -> Task.TYPE_DAILY
-//            "todo" -> Task.TYPE_TODO
-//            "reward" -> Task.TYPE_REWARD
-//            else -> ""
-//        }
-//        val bundle = Bundle()
-//        bundle.putString(TaskFormActivity.TASK_TYPE_KEY, type)
-//        context?.startActivity(intent)
-//    }
-//}
+class CreateTask: CustomSkill<AimyboxRequest, AimyboxResponse> {
+
+    override fun canHandle(response: AimyboxResponse) = response.action == "create_task"
+    override suspend fun onResponse(
+            response: AimyboxResponse,
+            aimybox: Aimybox,
+            defaultHandler: suspend (Response) -> Unit
+    ) {
+        val context = getApplicationContext()
+        val intent = Intent(context, TaskFormActivity::class.java)
+        val additionalData = HashMap<String, Any>()
+        val type = response.intent
+        additionalData["viewed task type"] = when (type) {
+            "habit" -> Task.TYPE_HABIT
+            "daily" -> Task.TYPE_DAILY
+            "todo" -> Task.TYPE_TODO
+            "reward" -> Task.TYPE_REWARD
+            else -> ""
+        }
+        val bundle = Bundle()
+        bundle.putString(TaskFormActivity.TASK_TYPE_KEY, type)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+    }
+}
