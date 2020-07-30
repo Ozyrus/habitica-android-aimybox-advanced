@@ -342,10 +342,17 @@ class CreateTask: CustomSkill<AimyboxRequest, AimyboxResponse> {
         }
         val bundle = Bundle()
         bundle.putString(TaskFormActivity.TASK_TYPE_KEY, type)
-        bundle.putString("activity_name", response.data?.get("taskName").toString())
-        bundle.putString("activity_description", response.data?.get("taskDescription").toString())
-        bundle.putBoolean("sentiment", response.data?.get("taskSentiment")?.asBoolean!!)
-        bundle.putString("activity_difficulty", response.data?.get("taskDifficulty")?.toString())
+        if (response.data != null) {
+            bundle.putString("activity_name", response.data?.get("taskName").toString().removeSurrounding("\""))
+            bundle.putString("activity_description", response.data?.get("taskDescription").toString().removeSurrounding("\""))
+            bundle.putBoolean("sentiment", response.data?.get("taskSentiment").toString().removeSurrounding("\"").toBoolean())
+            bundle.putString("activity_difficulty", response.data?.get("taskDifficulty").toString().removeSurrounding("\""))
+        } else {
+            bundle.putString("activity_name", type.toString())
+            bundle.putString("activity_description", "Описание")
+            bundle.putBoolean("sentiment", true)
+            bundle.putString("activity_difficulty", "hard")
+        }
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtras(bundle)
         context.startActivity(intent)
