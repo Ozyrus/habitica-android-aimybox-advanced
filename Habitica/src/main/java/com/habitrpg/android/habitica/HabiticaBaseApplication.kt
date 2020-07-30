@@ -299,7 +299,7 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
 
 class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
 
-    override fun canHandle(response: AimyboxResponse) = response.action == "change_view"
+    override fun canHandle(response: AimyboxResponse) = response.action == "changeView"
 
     override suspend fun onResponse(
             response: AimyboxResponse,
@@ -321,7 +321,9 @@ class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
 
 class CreateTask: CustomSkill<AimyboxRequest, AimyboxResponse> {
 
-    override fun canHandle(response: AimyboxResponse) = response.action == "create_task"
+
+    override fun canHandle(response: AimyboxResponse) = response.action == "createTask"
+
     override suspend fun onResponse(
             response: AimyboxResponse,
             aimybox: Aimybox,
@@ -340,7 +342,12 @@ class CreateTask: CustomSkill<AimyboxRequest, AimyboxResponse> {
         }
         val bundle = Bundle()
         bundle.putString(TaskFormActivity.TASK_TYPE_KEY, type)
+        bundle.putString("activity_name", response.data?.get("taskName").toString())
+        bundle.putString("activity_description", response.data?.get("taskDescription").toString())
+        bundle.putBoolean("sentiment", response.data?.get("taskSentiment")?.asBoolean!!)
+        bundle.putString("activity_difficulty", response.data?.get("taskDifficulty")?.toString())
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.putExtras(bundle)
         context.startActivity(intent)
     }
 }

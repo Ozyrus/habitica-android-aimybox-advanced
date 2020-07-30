@@ -171,6 +171,25 @@ class TaskFormActivity : BaseActivity() {
         textEditText.addTextChangedListener(OnChangeTextWatcher { _, _, _, _ ->
             checkCanSave()
         })
+        // Inserted code for voice activation
+        textEditText.setText(bundle.getString("activity_name")) // presetting task name
+        notesEditText.setText(bundle.getString("activity_description")) //presetting task description
+        if (bundle.getBoolean("sentiment")) {  // presetting task sentiment
+                    habitScoringButtons.isPositive = true
+                    habitScoringButtons.isNegative = false
+                } else {
+            habitScoringButtons.isNegative = true
+            habitScoringButtons.isPositive = false
+        }
+        when (bundle.getString("activity_difficulty")) { // presetting task difficulty
+            "trivial" -> taskDifficultyButtons.selectedDifficulty = 0.1f
+            "easy" -> taskDifficultyButtons.selectedDifficulty = 1f
+            "medium" -> taskDifficultyButtons.selectedDifficulty = 1.5f
+            "hard" -> taskDifficultyButtons.selectedDifficulty = 2f
+            else -> ""
+        }
+
+        habitScoringButtons.isPositive = true
         statStrengthButton.setOnClickListener { selectedStat = Stats.STRENGTH }
         statIntelligenceButton.setOnClickListener { selectedStat = Stats.INTELLIGENCE }
         statConstitutionButton.setOnClickListener { selectedStat = Stats.CONSTITUTION }
