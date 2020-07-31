@@ -309,8 +309,8 @@ class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
         val context = getApplicationContext()
         val intent = when (response.intent) {
             "settings" -> Intent(context, PrefsActivity::class.java)
-            "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)//TODO: change character stats
-            "profile" -> Intent(context, FullProfileActivity::class.java)//TODO: need UUID to open right profile
+            "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)//
+            "profile" -> Intent(context, FullProfileActivity::class.java)//
             "about" -> Intent(context, AboutActivity::class.java)
             else -> Intent(context, MainActivity::class.java)
         }
@@ -345,13 +345,10 @@ class CreateTask: CustomSkill<AimyboxRequest, AimyboxResponse> {
         if (response.data != null) {
             bundle.putString("activity_name", response.data?.get("taskName").toString().removeSurrounding("\""))
             bundle.putString("activity_description", response.data?.get("taskDescription").toString().removeSurrounding("\""))
-            bundle.putBoolean("sentiment", response.data?.get("taskSentiment").toString().removeSurrounding("\"").toBoolean())
-            bundle.putString("activity_difficulty", response.data?.get("taskDifficulty").toString().removeSurrounding("\""))
+
         } else {
             bundle.putString("activity_name", type.toString())
             bundle.putString("activity_description", "Описание")
-            bundle.putBoolean("sentiment", true)
-            bundle.putString("activity_difficulty", "hard")
         }
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtras(bundle)
