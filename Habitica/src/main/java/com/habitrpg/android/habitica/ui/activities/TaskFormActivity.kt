@@ -37,6 +37,7 @@ import com.habitrpg.android.habitica.models.user.Stats
 import com.habitrpg.android.habitica.ui.helpers.bindView
 import com.habitrpg.android.habitica.ui.views.dialogs.HabiticaAlertDialog
 import com.habitrpg.android.habitica.ui.views.tasks.form.*
+import com.justai.aimybox.components.AimyboxAssistantFragment
 import io.reactivex.functions.Consumer
 import io.realm.RealmList
 import java.util.*
@@ -188,9 +189,6 @@ class TaskFormActivity : BaseActivity() {
         }
 
         title = ""
-        // Inserted code for voice activation
-        textEditText.setText(bundle.getString("activity_name")) // presetting task name
-        notesEditText.setText(bundle.getString("activity_description")) //presetting task description
         when {
             taskId != null -> {
                 isCreating = false
@@ -242,6 +240,7 @@ class TaskFormActivity : BaseActivity() {
     }
 
     private fun configureForm() {
+        val bundle = intent.extras ?: return
         val habitViewsVisibility = if (taskType == Task.TYPE_HABIT) View.VISIBLE else View.GONE
         habitScoringButtons.visibility = habitViewsVisibility
         habitResetStreakTitleView.visibility = habitViewsVisibility
@@ -282,6 +281,23 @@ class TaskFormActivity : BaseActivity() {
         tagsWrapper.visibility = if (isChallengeTask) View.GONE else View.VISIBLE
 
         statWrapper.visibility = if (usesTaskAttributeStats) View.VISIBLE else View.GONE
+        // Inserted code for voice activation
+        textEditText.setText(bundle.getString("activity_name")) // presetting task name
+        notesEditText.setText(bundle.getString("activity_description")) //presetting task description
+        if (bundle.getBoolean("sentiment")) {  // presetting task sentiment
+            habitScoringButtons.isPositive = true
+            habitScoringButtons.isNegative = false
+        } else {
+            habitScoringButtons.isNegative = true
+            habitScoringButtons.isPositive = false
+        }
+        when (bundle.getString("activity_difficulty").toString()) { // presetting task difficulty
+            "trivial" -> taskDifficultyButtons.selectedDifficulty = 0.1f
+            "easy" -> taskDifficultyButtons.selectedDifficulty = 1f
+            "medium" -> taskDifficultyButtons.selectedDifficulty = 1.5f
+            "hard" -> taskDifficultyButtons.selectedDifficulty = 2f
+            else -> taskDifficultyButtons.selectedDifficulty = 1f
+        }
         if (isCreating) {
             adjustStreakTitleView.visibility = View.GONE
             adjustStreakWrapper.visibility = View.GONE
@@ -455,12 +471,12 @@ class TaskFormActivity : BaseActivity() {
         } else {
                 resultIntent.putExtra(PARCELABLE_TASK, thisTask)
         }
-
         val mainHandler = Handler(this.mainLooper)
         mainHandler.postDelayed({
             setResult(Activity.RESULT_OK, resultIntent)
             dismissKeyboard()
             finish()
+            this.startActivity(Intent(this, MainActivity::class.java))
         }, 500)
     }
 
