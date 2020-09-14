@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="horizontal" android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:minHeight="@dimen/checklist_item_min_height">
+        <FrameLayout
+            android:id="@+id/checkBoxHolder"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="match_parent">
+        <CheckBox
+            android:id="@+id/checkBox"
+            android:layout_width="@dimen/checkbox_size"
+            android:layout_height="@dimen/checkbox_size"
+            android:gravity="center"
+            android:button="@drawable/checklist_checkbox"
+            android:layout_gravity="center" />
+        </FrameLayout>
+        <com.habitrpg.android.habitica.ui.views.HabiticaEmojiTextView
+            android:id="@+id/checkedTextView"
+            style="@style/Body2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:paddingStart="16dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hairline_height"
+        android:background="@color/cell_separator"/>
+</LinearLayout>

@@ -1,0 +1,65 @@
+language: android
+jdk: oraclejdk8
+udo: required
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+before_install:
+  - $CXX --version
+  - export JAVA7_HOME=/usr/lib/jvm/java-7-oracle
+  - export JAVA8_HOME=/usr/lib/jvm/java-8-oracle
+  - if [ $REQUIRES_SERVER ]; then nvm install 6.9.3; fi
+  - if [ $REQUIRES_SERVER ]; then nvm use 6.9.3; fi
+  - if [ $REQUIRES_SERVER ]; then npm i -g npm@4; fi
+  - if [ $REQUIRES_SERVER ]; then sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10; fi
+  - if [ $REQUIRES_SERVER ]; then echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list; fi
+  - if [ $REQUIRES_SERVER ]; then sudo apt-get update; fi
+  - if [ $REQUIRES_SERVER ]; then sudo apt-get install mongodb-org-server; fi
+  - if [ $REQUIRES_SERVER ]; then git clone https://github.com/HabitRPG/habitrpg.git ../habitrpg; fi
+  - if [ $REQUIRES_SERVER ]; then until nc -z localhost 27017; do echo Waiting for MongoDB; sleep 2; done; fi
+  - if [ $REQUIRES_SERVER ]; then cd ../habitrpg && cp config.json.example config.json && npm install; fi
+  - if [ $REQUIRES_SERVER ]; then npm start; fi &
+  - if [ $REQUIRES_SERVER ]; then until nc -z localhost 3000; do echo Waiting for Habitica Server; sleep 2; done; fi
+  - if [ $REQUIRES_SERVER ]; then cd -; fi
+android:
+  components:
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    # - platform-tools
+    - tools
+
+    # The BuildTools version used by your project
+    - build-tools-28.0.3
+
+    # The SDK version used to compile your project
+    - android-28
+
+    # Additional components
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    #- sys-img-armeabi-v7a-android-19
+    #- sys-img-x86-android-17
+  licenses:
+    - 'android-sdk-preview-license-52d11cd2'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+before_script:
+  - cp habitica.properties.travis habitica.properties
+  - cp habitica.resources habitica.resources
+  - cp Habitica/google-services.json.example Habitica/google-services.json
+script:
+  - ./gradlew $TEST
+env:
+  global:
+    - CXX=g++-4.8
+    - DISABLE_REQUEST_LOGGING=true
+  matrix:
+    - TEST="assembleDebug -PdisablePreDex"
+    - TEST="testProdDebugUnitTest -PdisablePreDex --stacktrace" REQUIRES_SERVER=true
