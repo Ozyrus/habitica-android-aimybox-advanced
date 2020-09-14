@@ -47,6 +47,8 @@ import com.justai.aimybox.core.CustomSkill
 import com.justai.aimybox.model.Response
 import com.justai.aimybox.speechkit.google.platform.GooglePlatformSpeechToText
 import com.justai.aimybox.speechkit.google.platform.GooglePlatformTextToSpeech
+import com.justai.aimybox.speechkit.kaldi.KaldiAssets
+import com.justai.aimybox.speechkit.kaldi.KaldiVoiceTrigger
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 import io.realm.Realm
@@ -286,27 +288,31 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
     private fun createAimybox(context: Context): Aimybox {
 
         val unitId = UUID.randomUUID().toString()
+//        val assets = KaldiAssets.fromApkAssets(this, "model/ru")
 
         val textToSpeech = GooglePlatformTextToSpeech(context, Locale("Ru"))
         val speechToText = GooglePlatformSpeechToText(context, Locale("Ru"))
+//        val voiceTrigger = KaldiVoiceTrigger(assets, listOf("хабитика", "эй хабитика"))
 
         val dialogApi = AimyboxDialogApi(
                 "1iy4V6nD0SgdS9HP3ipk7LSKE8V7ueTw", unitId,
-                customSkills = linkedSetOf(ChangeView(), CreateTask()))
-        return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) )
+                customSkills = linkedSetOf(ChangeView(context), CreateTask(context)))
+        return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) {
+//            this.voiceTrigger = voiceTrigger
+        } )
     }
 }
 
-class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
+class ChangeView(context_: Context): CustomSkill<AimyboxRequest, AimyboxResponse> {
 
     override fun canHandle(response: AimyboxResponse) = response.action == "changeView"
+    private var context: Context = context_
 
     override suspend fun onResponse(
             response: AimyboxResponse,
             aimybox: Aimybox,
             defaultHandler: suspend (Response) -> Unit
     ) {
-        val context = getApplicationContext()
         val intent = when (response.intent) {
             "settings" -> Intent(context, PrefsActivity::class.java)
             "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)//
@@ -319,17 +325,17 @@ class ChangeView: CustomSkill<AimyboxRequest, AimyboxResponse> {
     }
 }
 
-class CreateTask: CustomSkill<AimyboxRequest, AimyboxResponse> {
+class CreateTask(context_: Context): CustomSkill<AimyboxRequest, AimyboxResponse> {
 
 
     override fun canHandle(response: AimyboxResponse) = response.action == "createTask"
+    private var context: Context = context_
 
     override suspend fun onResponse(
             response: AimyboxResponse,
             aimybox: Aimybox,
             defaultHandler: suspend (Response) -> Unit
     ) {
-        val context = getApplicationContext()
         val intent = Intent(context, TaskFormActivity::class.java)
         val additionalData = HashMap<String, Any>()
         val type = response.intent

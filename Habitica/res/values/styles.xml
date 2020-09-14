@@ -57,12 +57,7 @@
     </style>
 
     <style name="CustomAssistantButtonTheme" parent="DefaultAssistantTheme.AssistantButton">
-
-        <!-- Customize Assistant button theme here -->
-
-        <!-- <item name="aimybox_backgroundColor">@color/primary</item> -->
-        <!-- <item name="aimybox_recordingAnimationColor">@color/recording</item> -->
-        <!-- <item name="aimybox_buttonExpandedColor">@color/white</item> -->
+        <item name="aimybox_buttonMarginBottom">108dp</item>
     </style>
 
 

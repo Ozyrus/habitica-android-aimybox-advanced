@@ -717,6 +717,7 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
             }, 5000)
         }
     }
+
     @SuppressLint("MissingPermission")
     override fun onRequestPermissionsResult(
             requestCode: Int,
@@ -729,6 +730,7 @@ open class MainActivity : BaseActivity(), TutorialView.OnTutorialReaction {
         fragmentTransaction.add(R.id.assistant_container, AimyboxAssistantFragment())
         fragmentTransaction.commit()
     }
+
 
     fun hatchPet(potion: HatchingPotion, egg: Egg) {
         compositeSubscription.add(this.inventoryRepository.hatchPet(egg, potion) {
