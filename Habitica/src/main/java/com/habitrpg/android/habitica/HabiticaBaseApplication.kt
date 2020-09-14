@@ -295,7 +295,7 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
 //        val voiceTrigger = KaldiVoiceTrigger(assets, listOf("хабитика", "эй хабитика"))
 
         val dialogApi = AimyboxDialogApi(
-                "1iy4V6nD0SgdS9HP3ipk7LSKE8V7ueTw", unitId,
+                "YOUR_KEY_HERE", unitId,
                 customSkills = linkedSetOf(ChangeView(context), CreateTask(context)))
         return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) {
 //            this.voiceTrigger = voiceTrigger
