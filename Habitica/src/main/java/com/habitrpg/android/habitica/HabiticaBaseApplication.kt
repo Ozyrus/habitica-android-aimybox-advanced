@@ -1,6 +1,5 @@
 package com.habitrpg.android.habitica
 
-import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -12,13 +11,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.edit
 import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
 import com.amplitude.api.Amplitude
 import com.amplitude.api.Identify
-import com.facebook.FacebookSdk.getApplicationContext
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.core.ImagePipelineConfig
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -34,6 +31,8 @@ import com.habitrpg.android.habitica.models.tasks.Task
 import com.habitrpg.android.habitica.modules.UserModule
 import com.habitrpg.android.habitica.modules.UserRepositoryModule
 import com.habitrpg.android.habitica.proxy.CrashlyticsProxy
+import com.habitrpg.android.habitica.skills.ChangeViewSkill
+import com.habitrpg.android.habitica.skills.CreateTaskSkill
 import com.habitrpg.android.habitica.ui.activities.*
 import com.habitrpg.android.habitica.ui.helpers.MarkdownParser
 import com.habitrpg.android.habitica.ui.views.HabiticaIconsHelper
@@ -47,8 +46,6 @@ import com.justai.aimybox.core.CustomSkill
 import com.justai.aimybox.model.Response
 import com.justai.aimybox.speechkit.google.platform.GooglePlatformSpeechToText
 import com.justai.aimybox.speechkit.google.platform.GooglePlatformTextToSpeech
-import com.justai.aimybox.speechkit.kaldi.KaldiAssets
-import com.justai.aimybox.speechkit.kaldi.KaldiVoiceTrigger
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 import io.realm.Realm
@@ -288,80 +285,15 @@ abstract class HabiticaBaseApplication : MultiDexApplication(), AimyboxProvider 
     private fun createAimybox(context: Context): Aimybox {
 
         val unitId = UUID.randomUUID().toString()
-//        val assets = KaldiAssets.fromApkAssets(this, "model/ru")
 
         val textToSpeech = GooglePlatformTextToSpeech(context, Locale("Ru"))
         val speechToText = GooglePlatformSpeechToText(context, Locale("Ru"))
-//        val voiceTrigger = KaldiVoiceTrigger(assets, listOf("хабитика", "эй хабитика"))
 
         val dialogApi = AimyboxDialogApi(
-                "YOUR_KEY_HERE", unitId,
-                customSkills = linkedSetOf(ChangeView(context), CreateTask(context)))
+                "1iy4V6nD0SgdS9HP3ipk7LSKE8V7ueTw", unitId,
+                customSkills = linkedSetOf(ChangeViewSkill(context), CreateTaskSkill(context)))
         return Aimybox(Config.create(speechToText, textToSpeech, dialogApi) {
-//            this.voiceTrigger = voiceTrigger
         } )
     }
 }
 
-class ChangeView(context_: Context): CustomSkill<AimyboxRequest, AimyboxResponse> {
-
-    override fun canHandle(response: AimyboxResponse) = response.action == "changeView"
-    private var context: Context = context_
-
-    override suspend fun onResponse(
-            response: AimyboxResponse,
-            aimybox: Aimybox,
-            defaultHandler: suspend (Response) -> Unit
-    ) {
-        val intent = when (response.intent) {
-            "settings" -> Intent(context, PrefsActivity::class.java)
-            "characteristics" -> Intent(context, FixCharacterValuesActivity::class.java)//
-            "profile" -> Intent(context, FullProfileActivity::class.java)//
-            "about" -> Intent(context, AboutActivity::class.java)
-            else -> Intent(context, MainActivity::class.java)
-        }
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    }
-}
-
-class CreateTask(context_: Context): CustomSkill<AimyboxRequest, AimyboxResponse> {
-
-
-    override fun canHandle(response: AimyboxResponse) = response.action == "createTask"
-    private var context: Context = context_
-
-    override suspend fun onResponse(
-            response: AimyboxResponse,
-            aimybox: Aimybox,
-            defaultHandler: suspend (Response) -> Unit
-    ) {
-        val intent = Intent(context, TaskFormActivity::class.java)
-        val additionalData = HashMap<String, Any>()
-        val type = response.intent
-        additionalData["viewed task type"] = when (type) {
-            "habit" -> Task.TYPE_HABIT
-            "daily" -> Task.TYPE_DAILY
-            "todo" -> Task.TYPE_TODO
-            "reward" -> Task.TYPE_REWARD
-            else -> ""
-        }
-        val bundle = Bundle()
-        bundle.putString(TaskFormActivity.TASK_TYPE_KEY, type)
-        if (response.data != null) {
-            bundle.putString("activity_name", response.data?.get("taskName")?.asString)
-            bundle.putString("activity_description", response.data?.get("taskDescription")?.asString)
-            response.data?.get("taskSentiment")?.asBoolean?.let { bundle.putBoolean("sentiment", it) } // no not have null problems
-            bundle.putString("activity_difficulty", response.data?.get("taskDifficulty")?.asString)
-
-        } else {
-            bundle.putString("activity_name", type)
-            bundle.putString("activity_description", "Описание")
-            bundle.putBoolean("sentiment", true)
-            bundle.putString("activity_difficulty", "hard")
-        }
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtras(bundle)
-        context.startActivity(intent)
-    }
-}
