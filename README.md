@@ -1,5 +1,7 @@
 # Habitica for Android with Aimybox voice assistant.
 
+> Archived (2020). Voice-assistant layer built on [HabitRPG/habitica-android](https://github.com/HabitRPG/habitica-android) (GPL-3.0).
+
 [Habitica](https://habitica.com) is an open source habit building program which treats your life like a Role Playing Game.
 [Aimybox](aimybox.com) is an open source Android SDK that allows you to embed your own intelligent voice assistant into your existing application or device.
 
